@@ -5,8 +5,11 @@ defmodule Game do
 
   defp await(events) do
     receive do
-      {:roll, pins, n} -> events = roll(pins, events, n)
-      {:score, pid} -> send(pid, {:score, iterar(events, 0, 0, 0)})
+      {:roll, pins, n} -> 
+        roll(pins, events, n) |> await()
+      {:score, pid} -> 
+        send(pid, {:score, iterar(events, 0, 0, 0)})
+        await(events)
     end
     await(events)
   end
@@ -29,9 +32,12 @@ defmodule Game do
 
   defp iterar(lista, acc, frame, index) do
     cond do
-      valorEnLista(lista, index, 0) == 10 -> iterar(lista, sumarValorParaStrike(acc, lista, index), frame + 1, index + 1)
-      valorEnLista(lista, index, 0) + valorEnLista(lista, index, 1) == 10 -> iterar(lista, sumarValorParaSpare(acc, lista, index), frame + 1, index + 2)
-      true -> iterar(lista, sumarValorNormal(acc, lista, index), frame + 1, index + 2)
+      valorEnLista(lista, index, 0) == 10 -> 
+        iterar(lista, sumarValorParaStrike(acc, lista, index), frame + 1, index + 1)
+      valorEnLista(lista, index, 0) + valorEnLista(lista, index, 1) == 10 -> 
+        iterar(lista, sumarValorParaSpare(acc, lista, index), frame + 1, index + 2)
+      true -> 
+        iterar(lista, sumarValorNormal(acc, lista, index), frame + 1, index + 2)
     end
   end
 
